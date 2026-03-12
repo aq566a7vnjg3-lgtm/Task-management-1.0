@@ -118,9 +118,16 @@ textarea{min-height:90px; resize:vertical;}
   gap:10px;
 }
 .case-item:hover{background:#fafafa;}
-.case-item.active{background:#dbeafe; box-shadow: inset 4px 0 0 #2563eb;}
+.case-item.active{
+  background:linear-gradient(90deg,#dbeafe 0%, #eff6ff 100%);
+  box-shadow: inset 6px 0 0 #2563eb, 0 0 0 2px rgba(37,99,235,.12);
+  border-top:1px solid #bfdbfe;
+  border-bottom:1px solid #bfdbfe;
+}
 .case-item.active .title{color:#1d4ed8;}
 .case-item.active .meta{color:#1e40af;}
+.case-item.active .small{color:#1e40af;}
+.case-item.active .badge{border-color:#93c5fd; background:#ffffff;}
 .case-item .title{font-weight:650; font-size:13px;}
 .case-item .meta{font-size:12px; color:var(--muted); margin-top:2px;}
 
@@ -2541,7 +2548,7 @@ const $ = (id)=>document.getElementById(id);
       const badge = nd ? `<span class="badge ${ndClass==='overdue'?'danger':ndClass==='soon'?'warn':''}">${fmtJP(nd)}(${weekdayJP(nd)})</span>` : `<span class="badge">期限なし</span>`;
       div.innerHTML = `
         <div>
-          <div class="title">${c.orderNo||'(未入力)'} <span class="small">${clampStr(c.userName||'',10)}</span></div>
+          <div class="title">${c.orderNo||'(未入力)'} <span class="small">${clampStr(c.userName||'',10)}</span> ${c.id===activeId?'<span class="badge auto">選択中</span>':''}</div>
           <div class="meta">登録: ${(()=>{if(c.regDone) return '-'; const r=c.derived?.regDateAuto||c.regDate||c.derived?.regPlannedDate; return r?`${fmtJP(r)}(${weekdayJP(r)})`:'-';})()}<br>納車センター書類: ${(()=>{const done=(c.tasks||[]).find(t=>t.key==='dc_docs_submit')?.done; if(done) return '-'; const d=c.derived?.dcDocsDueDate; return d?`${fmtJP(d)}(${weekdayJP(d)})`:'-';})()}<br>希望番号申請: ${(()=>{const t=(c.tasks||[]).find(x=>x.key==='hope_no_apply'); if(t?.done) return '-'; const h=(c.derived?.hopeNoApplyDueDate)||t?.dueDate; return h?`${fmtJP(h)}(${weekdayJP(h)})`:'-';})()}</div>
         </div>
         <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
@@ -3112,6 +3119,10 @@ const $ = (id)=>document.getElementById(id);
     renderTopCards();
     renderEarliestDeliveryPanel();
     updateGenerateButtons();
+    const activeEl = els.caseList && els.caseList.querySelector('.case-item.active');
+    if(activeEl){
+      activeEl.scrollIntoView({block:'nearest'});
+    }
   }
 
   async function createNew(){
